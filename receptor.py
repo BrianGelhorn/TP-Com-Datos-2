@@ -9,33 +9,30 @@ f_c = 300           # Frecuencia de la portadora (Hz)
 f_m = 10  # 10 Hz
 t = np.linspace(0, T, int(fs*T), endpoint=False)
 
-#Simulo ruido en el sistema
-noise = np.random.normal(0, .5, transmisor.señalModuladaCF().shape)
+#Recibo la señal y le simulo un ruido blanco en la misma
+noise = np.random.normal(0, .1, transmisor.señalModuladaCF().shape)
 s_t = transmisor.señalModuladaCF() + noise
 
 S_f = np.fft.fft(s_t)
 S_f = np.abs(S_f) / len(s_t)
 freqs = np.fft.fftfreq(len(s_t), 1/fs)
 
-# Parámetros del filtro
+# Creo y aplico un filtro pasabanda centrado en la frecuencia de la portadora
 lowcut = f_c - f_m  # 290 Hz
 highcut = f_c + f_m # 310 Hz
 
-# Diseño del filtro pasabanda Butterworth
-order = 1 # orden del filtro (puede ajustarse)
+order = 1
 b, a = butter(order, [lowcut/(fs/2), highcut/(fs/2)], btype='band')
 
-# Filtrado de la señal modulada
 s_t_filtered = filtfilt(b, a, s_t)
 
-# Espectro de la señal filtrada
 S_f_filtered = np.fft.fft(s_t_filtered)
 S_f_filtered = np.abs(S_f_filtered) / len(s_t_filtered)
 
 plt.figure(figsize=(12,8))
 plt.subplot(3,1,1)
 plt.plot(t, s_t)
-plt.title("s(t)+ruido")
+plt.title("s(t) con ruido")
 plt.xlabel("t")
 plt.ylabel("A")
 plt.grid(True)
@@ -44,18 +41,18 @@ plt.tight_layout()
 
 plt.subplot(3,1,2)
 plt.plot(freqs, S_f)
-plt.title("Espectro de la señal modulada s(t)")
-plt.xlabel("Frecuencia [Hz]")
-plt.ylabel("Magnitud")
+plt.title("S(f) con ruido")
+plt.xlabel("f")
+plt.ylabel("M")
 plt.grid(True)
 plt.tight_layout()
 
 # Gráfica del espectro de la señal filtrada
 plt.subplot(3,1,3)
-plt.plot(freqs, s_t_filtered)
-plt.title("Espectro de la señal AM filtrada (pasabanda)")
-plt.xlabel("Frecuencia [Hz]")
-plt.ylabel("Magnitud")
+plt.plot(t, s_t_filtered)
+plt.title("s(t) con ruido con filtro pasabanda")
+plt.xlabel("t")
+plt.ylabel("A")
 plt.grid(True)
 plt.tight_layout()
 plt.show()
@@ -65,18 +62,18 @@ plt.show()
 c_t = 2*np.cos(2 * np.pi * f_c * t)
 
 plt.subplot(2,1,1)
-s_t_filtered = s_t_filtered*c_t
-S_f_filtered = np.fft.fft(s_t_filtered)
-S_f_filtered = np.abs(S_f_filtered) / len(s_t_filtered)
-plt.plot(t, s_t_filtered)
-plt.title("Espectro de la señal AM filtrada (pasabanda)")
-plt.xlabel("Frecuencia [Hz]")
-plt.ylabel("Magnitud")
+m_t = s_t_filtered*c_t
+M_f = np.fft.fft(m_t)
+M_f = np.abs(M_f) / len(m_t)
+plt.plot(t, m_t)
+plt.title("m(t) con ruido y filtro pasabanda")
+plt.xlabel("t")
+plt.ylabel("A")
 plt.grid(True)
 plt.tight_layout()
 # Gráfica del espectro de la señal filtrada
 plt.subplot(2,1,2)
-plt.plot(freqs, S_f_filtered)
+plt.plot(freqs, M_f)
 plt.title("Espectro de la señal AM filtrada (pasabanda)")
 plt.xlabel("Frecuencia [Hz]")
 plt.ylabel("Magnitud")
@@ -91,17 +88,15 @@ def filtro_pasabajo(data, cutoff, fs, orden=5):
     b, a = butter(orden, cutoff / nyq, btype='low')
     return filtfilt(b, a, data)
 
-# Parámetro del filtro pasabajo
-cutoff = f_m + 20  # Un poco más del ancho del mensaje (por ejemplo, 15 Hz)
+#Creo y aplico filtro pasabajo 
+cutoff = f_m + 20
+m_t_recovered = filtro_pasabajo(m_t, cutoff, fs)
 
-# Aplicar filtro pasabajo
-mensaje_recuperado = filtro_pasabajo(s_t_filtered, cutoff, fs)
-
-# Mostrar señal recuperada
-plt.plot(t, mensaje_recuperado)
-plt.title("Señal demodulada (mensaje recuperado)")
-plt.xlabel("Tiempo [s]")
-plt.ylabel("Amplitud")
+#Mensaje Recuperado
+plt.plot(t, m_t_recovered)
+plt.title("m(t) Mensaje Recuperado")
+plt.xlabel("t")
+plt.ylabel("A")
 plt.grid(True)
 plt.tight_layout()
 plt.show()

@@ -48,7 +48,7 @@ def señalModuladaCF():
     return s_t_filtered
 
 def mostrarGraficos():
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(16, 12))
 
     plt.subplot(3, 1, 1)
     plt.plot(t, m_t)
@@ -75,7 +75,7 @@ def mostrarGraficos():
     plt.figure(figsize=(12,8))
     plt.subplot(3, 1, 1)
     plt.plot(t, s_t)
-    plt.title("AM")
+    plt.title("s(t)")
     plt.xlabel("t")
     plt.ylabel("A")
     plt.grid(True)
@@ -84,9 +84,9 @@ def mostrarGraficos():
 
     plt.subplot(3,1,2)
     plt.plot(freqs, S_f)
-    plt.title("Espectro de la señal modulada s(t)")
-    plt.xlabel("Frecuencia [Hz]")
-    plt.ylabel("Magnitud")
+    plt.title("S(f)")
+    plt.xlabel("f")
+    plt.ylabel("M")
     plt.grid(True)
     plt.tight_layout()
 
@@ -94,11 +94,11 @@ def mostrarGraficos():
     # Gráfica del espectro de la señal filtrada
     plt.subplot(3,1,3)
     plt.plot(freqs, S_f_filtered)
-    plt.title("Espectro de la señal AM filtrada (pasabanda)")
-    plt.xlabel("Frecuencia [Hz]")
-    plt.ylabel("Magnitud")
+    plt.title("S(f) Con filtropasabanda")
+    plt.xlabel("f")
+    plt.ylabel("M")
     plt.grid(True)
     plt.tight_layout()
     plt.show()
-
+# mostrarGraficos()
 
